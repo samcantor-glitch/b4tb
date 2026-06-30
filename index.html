@@ -6,12 +6,169 @@
 <title>Panther · Bang for the Buck</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  html, body, #root { background: #fff; font-family: 'Poppins', system-ui, sans-serif; color: #171717; }
-  .rule { height: 1px; background: #e5e5e5; }
-  .sticky-bar { position: sticky; top: 0; z-index: 10; }
+  /* Civic Modern tokens — mirrored from gp-portal tokens.jsx
+     If a value moves there, move it here. Never patch downstream. */
+  :root {
+    /* Color: surfaces */
+    --bg: #FFFFFF;
+    --paper: #FAFAF8;
+    --surfaceHi: #F4F3EF;
+
+    /* Color: lines */
+    --hair: #E8E6E0;
+    --strong: #D6D3CC;
+
+    /* Color: text */
+    --text: #111113;
+    --body: #3A3A3D;
+    --muted: #6B6B70;
+    --dim: #9A9A9E;
+
+    /* Color: action — RESERVED for the one CTA / focus ring */
+    --action: #D63600;
+    --action-hi: #B02C00;
+    --action-soft: #FFF1EC;
+
+    /* Color: status (passive only) */
+    --err: #B42318;
+
+    /* Type */
+    --font-sans: 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+    /* Radius */
+    --r-xs: 4px;
+    --r-md: 8px;
+
+    /* Spacing (reference; Tailwind handles emit) */
+  }
+
+  html, body, #root { background: var(--bg); color: var(--text); font-family: var(--font-sans); }
+  body { font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+  /* Atoms — CSS for components that aren't trivially Tailwindable */
+
+  .micro {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .id-chip {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--dim);
+    letter-spacing: 0.02em;
+  }
+
+  .hair { background: var(--hair); height: 1px; width: 100%; }
+
+  .field-label { font-size: 16px; font-weight: 500; color: var(--text); display: block; margin-bottom: 8px; }
+  .field-help { font-size: 14px; color: var(--muted); margin-top: 6px; }
+  .field-err { font-size: 14px; color: var(--err); margin-top: 6px; }
+
+  .control {
+    width: 100%;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--strong);
+    border-radius: var(--r-xs);
+    padding: 12px 16px;
+    transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+    min-height: 44px;
+  }
+  .control:hover:not(:focus) { border-color: var(--text); }
+  .control:focus { outline: none; border-color: var(--action); box-shadow: 0 0 0 1px var(--action); }
+  .control[aria-invalid="true"] { border-width: 2px; border-color: var(--err); padding: 11px 15px; }
+  .control[aria-invalid="true"]:focus { box-shadow: 0 0 0 1px var(--err); }
+  select.control { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236B6B70'><path d='M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 44px; }
+
+  .btn {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: var(--r-xs);
+    padding: 14px 22px;
+    min-height: 44px;
+    cursor: pointer;
+    transition: background 150ms ease-out, color 150ms ease-out, border-color 150ms ease-out;
+  }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--action); }
+  .btn-primary { background: var(--action); color: #fff; border: 1px solid var(--action); }
+  .btn-primary:hover:not(:disabled) { background: var(--action-hi); border-color: var(--action-hi); }
+  .btn-primary:disabled { background: var(--strong); border-color: var(--strong); cursor: not-allowed; }
+  .btn-tertiary { background: transparent; color: var(--muted); border: 1px solid transparent; padding: 14px 12px; }
+  .btn-tertiary:hover { color: var(--text); }
+
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--hair);
+    border-radius: var(--r-md);
+    padding: 20px;
+    transition: border-color 150ms ease-out, background 150ms ease-out;
+  }
+  .card:hover { border-color: var(--strong); }
+  .card[data-picked="true"] { border-color: var(--text); background: var(--paper); }
+  .card[data-disabled="true"] { opacity: 0.45; }
+  .card[data-disabled="true"]:hover { border-color: var(--hair); }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    background: var(--surfaceHi);
+    color: var(--body);
+  }
+  .pill[data-tone="picked"] { background: var(--text); color: #fff; }
+
+  .learn-more {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    min-height: 32px;
+  }
+  .learn-more:hover { color: var(--text); }
+  .learn-more:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--action); border-radius: 2px; }
+
+  .why-block { border-top: 1px solid var(--hair); padding-top: 16px; margin-top: 16px; }
+
+  /* Display sizes — Civic Modern scale */
+  .t-h1 { font-size: 40px; line-height: 1.2; font-weight: 500; letter-spacing: -0.04em; color: var(--text); }
+  .t-h3 { font-size: 24px; line-height: 1.3; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
+  .t-h4 { font-size: 18px; line-height: 1.4; font-weight: 500; color: var(--text); }
+  .t-body { font-size: 16px; line-height: 1.5; color: var(--body); }
+  .t-bodySm { font-size: 14px; line-height: 1.5; color: var(--body); }
+  .t-caption { font-size: 12px; line-height: 1.4; color: var(--muted); }
+
+  .price-num { font-family: var(--font-mono); font-weight: 500; font-size: 18px; color: var(--text); letter-spacing: -0.01em; }
+  .price-num-lg { font-family: var(--font-mono); font-weight: 500; font-size: 32px; color: var(--text); letter-spacing: -0.02em; }
+
+  .sticky-bar { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--hair); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -23,7 +180,6 @@ import { html, render, useState, useMemo } from 'https://esm.sh/htm/preact/stand
 // === CONFIG ===========================================================
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbyUSXtmX3vlPu5dOcjRhOux3MPwJp21MnCirIOoJvbg3OoVqELAgm_l8YygnqTxl-UbSg/exec";
 const BUDGET = 100;
-const ORANGE = "#FF4D1C";
 // =====================================================================
 
 const BETS = [
@@ -139,6 +295,119 @@ const BETS = [
   },
 ];
 
+// === Atoms ============================================================
+
+const Field = ({ label, help, error, htmlFor, children }) => html`
+  <div>
+    <label class="field-label" for=${htmlFor}>${label}</label>
+    ${children}
+    ${help && !error && html`<div class="field-help">${help}</div>`}
+    ${error && html`<div class="field-err">${error}</div>`}
+  </div>
+`;
+
+const Input = ({ id, value, onInput, placeholder, invalid }) => html`
+  <input
+    id=${id}
+    class="control"
+    type="text"
+    value=${value}
+    onInput=${onInput}
+    placeholder=${placeholder}
+    aria-invalid=${invalid ? "true" : "false"}
+  />
+`;
+
+const Select = ({ id, value, onChange, options, invalid }) => html`
+  <select
+    id=${id}
+    class="control"
+    value=${value}
+    onChange=${onChange}
+    aria-invalid=${invalid ? "true" : "false"}
+  >
+    ${options.map(o => html`<option key=${o.value} value=${o.value}>${o.label}</option>`)}
+  </select>
+`;
+
+const Textarea = ({ id, value, onInput, placeholder, rows = 3 }) => html`
+  <textarea
+    id=${id}
+    class="control"
+    rows=${rows}
+    value=${value}
+    onInput=${onInput}
+    placeholder=${placeholder}
+  ></textarea>
+`;
+
+const Button = ({ type = "button", variant = "primary", onClick, disabled, children }) => html`
+  <button type=${type} class=${`btn btn-${variant}`} onClick=${onClick} disabled=${disabled}>
+    ${children}
+  </button>
+`;
+
+const Pill = ({ tone = "default", children }) => html`
+  <span class="pill" data-tone=${tone}>${children}</span>
+`;
+
+// === Molecule =========================================================
+
+const BetCard = ({ bet, picked, tooExpensive, isOpen, onToggle, onToggleExpand }) => html`
+  <li
+    class="card"
+    data-picked=${picked ? "true" : "false"}
+    data-disabled=${tooExpensive ? "true" : "false"}
+  >
+    <div
+      class=${`flex items-start justify-between gap-4 ${tooExpensive ? "cursor-not-allowed" : "cursor-pointer"}`}
+      onClick=${() => !tooExpensive && onToggle()}
+      role="button"
+      aria-pressed=${picked}
+      aria-disabled=${tooExpensive}
+    >
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="id-chip">${bet.id}</span>
+          <span class="t-h4">${bet.name}</span>
+        </div>
+        <p class="t-bodySm">${bet.desc}</p>
+      </div>
+      <div class="text-right shrink-0 flex flex-col items-end gap-2">
+        <div class="price-num">$${bet.price}</div>
+        <${Pill} tone=${picked ? "picked" : "default"}>
+          ${picked ? "Picked" : tooExpensive ? "Over budget" : "Tap to pick"}
+        <//>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="learn-more"
+      onClick=${(e) => { e.stopPropagation(); onToggleExpand(); }}
+      aria-expanded=${isOpen}
+    >
+      ${isOpen ? "Hide details" : "Learn more"}
+    </button>
+
+    ${isOpen && html`
+      <div class="why-block">
+        <div class="micro" style=${{ marginBottom: '12px' }}>Why this matters to you</div>
+        <ul class="space-y-3">
+          ${bet.impact.map(im => html`
+            <li>
+              <div class="t-bodySm" style=${{ color: 'var(--text)', fontWeight: 500 }}>${im.role}</div>
+              <div class="t-bodySm">${im.text}</div>
+            </li>
+          `)}
+        </ul>
+      </div>
+    `}
+  </li>
+`;
+
+// === Screen ===========================================================
+
 function PantherVote() {
   const [step, setStep] = useState("identify");
   const [name, setName] = useState("");
@@ -149,12 +418,6 @@ function PantherVote() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
-
-  function toggleExpand(id) {
-    const next = new Set(expanded);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    setExpanded(next);
-  }
 
   const spent = useMemo(
     () => BETS.filter(b => picks.has(b.id)).reduce((s, b) => s + b.price, 0),
@@ -173,14 +436,16 @@ function PantherVote() {
     setPicks(next);
   }
 
+  function toggleExpand(id) {
+    const next = new Set(expanded);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setExpanded(next);
+  }
+
   async function submit() {
     setError("");
-    if (!name.trim() || !team.trim()) { setError("Name and team are required."); return; }
+    if (!name.trim() || !team.trim()) { setError("Add your name and team to submit."); return; }
     if (picks.size === 0) { setError("Pick at least one bet."); return; }
-    if (ENDPOINT.startsWith("REPLACE")) {
-      setError("Voting endpoint isn't configured yet. Sam needs to paste the Apps Script URL into index.html.");
-      return;
-    }
     setSubmitting(true);
     const payload = {
       voter: name.trim(),
@@ -208,176 +473,116 @@ function PantherVote() {
   if (submitted) {
     return html`
       <div class="max-w-2xl mx-auto px-6 py-24">
-        <div class="text-xs uppercase tracking-widest text-neutral-500 mb-3">Vote in</div>
-        <h1 class="text-4xl font-semibold mb-6">Thanks, ${name.split(" ")[0]}.</h1>
-        <div class="rule mb-6"></div>
-        <p class="text-neutral-700 mb-2">Your picks are logged. Sam has them.</p>
-        <p class="text-neutral-500 text-sm">You spent $${spent} of $${BUDGET} on ${picks.size} bet${picks.size === 1 ? "" : "s"}.</p>
+        <div class="micro" style=${{ marginBottom: '12px' }}>Vote in</div>
+        <h1 class="t-h1" style=${{ marginBottom: '24px' }}>Thanks, ${name.split(" ")[0]}.</h1>
+        <div class="hair" style=${{ marginBottom: '24px' }}></div>
+        <p class="t-body" style=${{ marginBottom: '8px' }}>Your picks are logged. Sam has them.</p>
+        <p class="t-bodySm" style=${{ color: 'var(--muted)' }}>You spent $${spent} of $${BUDGET} on ${picks.size} bet${picks.size === 1 ? "" : "s"}.</p>
       </div>
     `;
   }
 
   return html`
-    <div class="max-w-3xl mx-auto px-6 py-12">
+    <div class="max-w-3xl mx-auto px-6 py-16">
       <header class="mb-8">
-        <div class="text-xs uppercase tracking-widest text-neutral-500 mb-2">Panther</div>
-        <h1 class="text-4xl font-semibold mb-3">Bang for the Buck</h1>
-        <p class="text-neutral-600 max-w-xl">
-          You have <span class="font-semibold" style=${{ color: ORANGE }}>$${BUDGET}</span> to spend on the team's bets.
+        <div class="micro" style=${{ marginBottom: '12px' }}>Panther</div>
+        <h1 class="t-h1" style=${{ marginBottom: '16px' }}>Bang for the Buck</h1>
+        <p class="t-body" style=${{ maxWidth: '34rem' }}>
+          You have <span class="price-num">$${BUDGET}</span> to spend on the team's bets.
           Each bet is priced by the effort to ship it. Pick the ones you'd actually fund.
         </p>
-        <p class="text-neutral-500 text-sm mt-3 max-w-xl">
+        <p class="t-bodySm" style=${{ maxWidth: '34rem', marginTop: '12px', color: 'var(--muted)' }}>
           Sam will see who voted. How you voted stays between you and him.
         </p>
       </header>
 
-      <div class="rule mb-8"></div>
+      <div class="hair" style=${{ marginBottom: '32px' }}></div>
 
       ${step === "identify" && html`
         <section>
-          <h2 class="text-xs uppercase tracking-widest text-neutral-500 mb-4">Who's voting</h2>
-          <div class="space-y-4 mb-8">
-            <div>
-              <label class="block text-sm text-neutral-600 mb-1">Your name</label>
-              <input
-                value=${name}
-                onInput=${e => setName(e.target.value)}
-                class="w-full border border-neutral-300 px-3 py-2 focus:outline-none focus:border-neutral-900"
-                placeholder="Jane Doe"
-              />
-            </div>
-            <div>
-              <label class="block text-sm text-neutral-600 mb-1">Team you spend the most time on</label>
-              <select
+          <div class="micro" style=${{ marginBottom: '20px' }}>Who's voting</div>
+          <div class="space-y-5" style=${{ marginBottom: '32px' }}>
+            <${Field} label="Your name" htmlFor="voter-name">
+              <${Input} id="voter-name" value=${name} onInput=${e => setName(e.target.value)} />
+            <//>
+            <${Field} label="Team you spend the most time on" htmlFor="voter-team">
+              <${Select}
+                id="voter-team"
                 value=${team}
                 onChange=${e => setTeam(e.target.value)}
-                class="w-full border border-neutral-300 px-3 py-2 bg-white focus:outline-none focus:border-neutral-900"
-              >
-                <option value="">Pick one</option>
-                <option value="GovPilot">GovPilot</option>
-                <option value="SDL Connect">SDL Connect</option>
-                <option value="Hedgerow">Hedgerow</option>
-                <option value="Cross-functional">Cross-functional</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
+                options=${[
+                  { value: "", label: "Pick one" },
+                  { value: "GovPilot", label: "GovPilot" },
+                  { value: "SDL Connect", label: "SDL Connect" },
+                  { value: "Hedgerow", label: "Hedgerow" },
+                  { value: "Cross-functional", label: "Cross-functional" },
+                  { value: "Other", label: "Other" },
+                ]}
+              />
+            <//>
           </div>
-          <button
-            onClick=${() => setStep("vote")}
-            disabled=${!name.trim() || !team.trim()}
-            class="px-6 py-2 text-white font-medium disabled:opacity-40"
-            style=${{ background: ORANGE }}
-          >
+          <${Button} onClick=${() => setStep("vote")} disabled=${!name.trim() || !team.trim()}>
             Start voting
-          </button>
+          <//>
         </section>
       `}
 
       ${step === "vote" && html`
         <section>
-          <div class="sticky-bar bg-white py-4 -mx-6 px-6 border-b border-neutral-200 mb-6 flex items-baseline justify-between">
+          <div class="sticky-bar -mx-6 px-6 py-4 mb-6 flex items-baseline justify-between">
             <div>
-              <div class="text-xs uppercase tracking-widest text-neutral-500">Remaining</div>
-              <div class="text-3xl font-semibold" style=${{ color: remaining === 0 ? "#171717" : ORANGE }}>
-                $${remaining}
-              </div>
+              <div class="micro" style=${{ marginBottom: '4px' }}>Remaining</div>
+              <div class="price-num-lg">$${remaining}</div>
             </div>
-            <div class="text-sm text-neutral-500">
+            <div class="t-bodySm" style=${{ color: 'var(--muted)' }}>
               ${picks.size} bet${picks.size === 1 ? "" : "s"} · $${spent} spent
             </div>
           </div>
 
-          <ul class="space-y-3 mb-8">
-            ${BETS.map(b => {
-              const picked = picks.has(b.id);
-              const tooExpensive = !picked && b.price > remaining;
-              const isOpen = expanded.has(b.id);
-              return html`
-                <li
-                  key=${b.id}
-                  class=${`border p-4 transition ${
-                    picked ? "border-neutral-900 bg-neutral-50" : tooExpensive ? "border-neutral-200 opacity-40" : "border-neutral-200 hover:border-neutral-400"
-                  }`}
-                >
-                  <div
-                    onClick=${() => !tooExpensive && toggle(b)}
-                    class=${`flex items-start justify-between gap-4 ${tooExpensive ? "cursor-not-allowed" : "cursor-pointer"}`}
-                  >
-                    <div class="flex-1">
-                      <div class="flex items-center gap-2 mb-1">
-                        <span class="font-mono text-xs text-neutral-400">${b.id}</span>
-                        <span class="font-semibold">${b.name}</span>
-                      </div>
-                      <div class="text-sm text-neutral-700">${b.desc}</div>
-                    </div>
-                    <div class="text-right shrink-0">
-                      <div class="font-semibold" style=${{ color: picked ? ORANGE : "#171717" }}>$${b.price}</div>
-                      <div class="text-xs text-neutral-500 mt-1">${picked ? "Picked" : tooExpensive ? "Over budget" : "Tap to pick"}</div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick=${(e) => { e.stopPropagation(); toggleExpand(b.id); }}
-                    class="mt-3 text-xs uppercase tracking-widest text-neutral-500 hover:text-neutral-900"
-                  >
-                    ${isOpen ? "Hide details −" : "Learn more +"}
-                  </button>
-
-                  ${isOpen && html`
-                    <div class="mt-3 pt-3 border-t border-neutral-200 space-y-2">
-                      <div class="text-xs uppercase tracking-widest text-neutral-500">Why this matters to you</div>
-                      <ul class="space-y-2">
-                        ${b.impact.map(im => html`
-                          <li class="text-sm">
-                            <div class="font-medium text-neutral-900">${im.role}</div>
-                            <div class="text-neutral-700">${im.text}</div>
-                          </li>
-                        `)}
-                      </ul>
-                    </div>
-                  `}
-                </li>
-              `;
-            })}
+          <ul class="space-y-3" style=${{ marginBottom: '32px' }}>
+            ${BETS.map(b => html`
+              <${BetCard}
+                key=${b.id}
+                bet=${b}
+                picked=${picks.has(b.id)}
+                tooExpensive=${!picks.has(b.id) && b.price > remaining}
+                isOpen=${expanded.has(b.id)}
+                onToggle=${() => toggle(b)}
+                onToggleExpand=${() => toggleExpand(b.id)}
+              />
+            `)}
           </ul>
 
-          <div class="mb-6">
-            <label class="block text-xs uppercase tracking-widest text-neutral-500 mb-2">
-              Anything to add (optional)
-            </label>
-            <textarea
-              value=${note}
-              onInput=${e => setNote(e.target.value)}
-              rows=${3}
-              class="w-full border border-neutral-300 px-3 py-2 focus:outline-none focus:border-neutral-900"
-              placeholder="Why these bets, what's missing, what you'd push back on."
-            ></textarea>
+          <div style=${{ marginBottom: '24px' }}>
+            <${Field}
+              label="Anything to add"
+              help="Why these bets, what's missing, what you'd push back on. Optional."
+              htmlFor="voter-note"
+            >
+              <${Textarea}
+                id="voter-note"
+                value=${note}
+                onInput=${e => setNote(e.target.value)}
+                rows=${3}
+              />
+            <//>
           </div>
 
-          ${error && html`<div class="text-sm mb-4" style=${{ color: ORANGE }}>${error}</div>`}
+          ${error && html`<div class="field-err" style=${{ marginBottom: '16px' }}>${error}</div>`}
 
-          <div class="flex items-center gap-3">
-            <button
-              onClick=${submit}
-              disabled=${submitting || picks.size === 0}
-              class="px-6 py-2 text-white font-medium disabled:opacity-40"
-              style=${{ background: ORANGE }}
-            >
+          <div class="flex items-center gap-2">
+            <${Button} onClick=${submit} disabled=${submitting || picks.size === 0}>
               ${submitting ? "Submitting…" : "Submit vote"}
-            </button>
-            <button
-              onClick=${() => setStep("identify")}
-              class="px-3 py-2 text-sm text-neutral-500 hover:text-neutral-800"
-            >
+            <//>
+            <${Button} variant="tertiary" onClick=${() => setStep("identify")}>
               Back
-            </button>
+            <//>
           </div>
         </section>
       `}
 
-      <footer class="mt-16 pt-6 border-t border-neutral-200 text-xs text-neutral-400">
-        Panther · Bang for the Buck · One vote per person.
+      <footer style=${{ marginTop: '80px', paddingTop: '24px', borderTop: '1px solid var(--hair)' }}>
+        <div class="t-caption">Panther · Bang for the Buck · One vote per person.</div>
       </footer>
     </div>
   `;
