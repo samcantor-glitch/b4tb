@@ -21,24 +21,122 @@
 import { html, render, useState, useMemo } from 'https://esm.sh/htm/preact/standalone';
 
 // === CONFIG ===========================================================
-// Paste the Apps Script Web App URL here after you deploy the script.
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbyUSXtmX3vlPu5dOcjRhOux3MPwJp21MnCirIOoJvbg3OoVqELAgm_l8YygnqTxl-UbSg/exec";
-const PARENT_BETS_URL = "https://govpilot.atlassian.net/wiki/spaces/SD/pages/1297285133";
 const BUDGET = 100;
 const ORANGE = "#FF4D1C";
 // =====================================================================
 
 const BETS = [
-  { id: "B04", name: "What shipped today, in plain English", owner: "Sam", price: 15, desc: "Claude posts a daily Slack summary of what shipped, in plain English." },
-  { id: "B05", name: "Mine CS calls for bugs and FRs", owner: "Sam + Bill", price: 35, desc: "Claude scans Gong calls nightly, pulls bugs and FRs, CSM confirms, files Jira." },
-  { id: "B07", name: "Release notes that actually ship", owner: "Jennifer", price: 15, desc: "Extend Hedgerow's release-notes workflow to GovPilot and SDL Connect." },
-  { id: "B08", name: "A living ICP, with citations", owner: "Jennifer", price: 35, desc: "Claude maintains the ICP from Gong and other sources, every claim cited." },
-  { id: "B09", name: "Let AI generate large parts of our code", owner: "Hannes", price: 40, desc: "Give Claude a spec, let it generate big chunks of the codebase." },
-  { id: "B11", name: "Catch bugs from the error logs", owner: "Hannes", price: 20, desc: "Claude scans Sentry nightly to surface bugs QA and devs missed." },
-  { id: "B13", name: "Done means done. Customer hears about it", owner: "Sam", price: 25, desc: "Ticket Done auto-pings the CSM via HubSpot so the customer hears." },
-  { id: "B14", name: "Plan one month at a time", owner: "Sam", price: 20, desc: "Retire the quarterly roadmap. Each team publishes one month at a time." },
-  { id: "B16", name: "Support to engineering bug pipeline", owner: "Justin", price: 25, desc: "Weekly cross-ref of HubSpot tickets vs Jira bugs so volume drives priority." },
-  { id: "B17", name: "Coaching briefs, not coaching spreadsheets", owner: "Justin", price: 25, desc: "Weekly auto-brief per support agent so managers walk into 1:1s ready." },
+  {
+    id: "B04",
+    name: "What shipped today, in plain English",
+    price: 15,
+    desc: "Claude posts a daily summary of what shipped that day to a Slack channel, in words that aren't commit messages. Fun, light, readable.",
+    impact: [
+      { role: "If you do CS or support", text: "You know what fixes shipped without asking. Faster, more accurate customer responses." },
+      { role: "If you do marketing or sales", text: "You see stories to pull forward without having to interrogate engineering. Release stories are easier to write." },
+      { role: "If you do engineering", text: "Your work becomes visible to the rest of the org. Morale loop tightens when shipping gets noticed." },
+    ],
+  },
+  {
+    id: "B05",
+    name: "Mine customer calls for bugs and feature requests",
+    price: 35,
+    desc: "Claude listens to every Gong CS call nightly, pulls out anything that sounds like a bug or a feature request, double checks with the CSM, then files it in Jira.",
+    impact: [
+      { role: "If you do CS", text: "You stop having to remember every passing comment from a call. The system catches them and asks you to confirm. Customers feel heard." },
+      { role: "If you do product or engineering", text: "You get a steady stream of validated customer signal instead of having to chase it. Prioritization gets sharper." },
+      { role: "If you're a customer", text: "The gap between mentioning something on a call and engineering knowing about it shrinks from weeks to one day." },
+    ],
+  },
+  {
+    id: "B07",
+    name: "Release notes that actually ship",
+    price: 15,
+    desc: "Hedgerow already proved the workflow: engineers feed input, Claude drafts the notes, Millie reviews and edits, notes get published. We extend the same playbook to GovPilot and SDL Connect.",
+    impact: [
+      { role: "If you do sales", text: "Real talking points for every release. No more 'I think we shipped that?'" },
+      { role: "If you do CS", text: "Notes you can point a customer at when they ask what's new. Customers see steady forward motion." },
+      { role: "If you do marketing", text: "Consistent content stream. Each release becomes pullable for blog, email, or social." },
+    ],
+  },
+  {
+    id: "B08",
+    name: "A living ICP, with citations",
+    price: 35,
+    desc: "Claude builds and maintains our Ideal Customer Profile by pulling from Gong calls and other sources, citing every claim, refreshed on a cadence. Replaces the static deck that's already out of date.",
+    impact: [
+      { role: "If you do sales", text: "You target the right buyers because the profile actually reflects who's buying right now, not who was buying 18 months ago." },
+      { role: "If you do marketing", text: "Messaging stays calibrated to the real customer. Every claim is traceable to a source you can quote." },
+      { role: "If you do product", text: "You build for the customer we have, not the customer we used to talk about. Roadmap conversations get sharper." },
+    ],
+  },
+  {
+    id: "B09",
+    name: "Let AI generate large parts of our code",
+    price: 40,
+    desc: "We give Claude a spec and let it generate big chunks of our codebase. We use it to ship faster when we pick up a new framework or rebuild an aging service.",
+    impact: [
+      { role: "If you do product", text: "Pivoting to new tech stops being a one-year project. New ideas can be tried at a fraction of the cost." },
+      { role: "If you do sales or CS", text: "Faster delivery of customer-requested capabilities. Things that used to take a quarter take weeks." },
+      { role: "If you do engineering", text: "You spend more time on the interesting 20% (architecture, edge cases, review) and less on the rote 80%." },
+    ],
+  },
+  {
+    id: "B11",
+    name: "Catch bugs from the error logs",
+    price: 20,
+    desc: "Claude scans Sentry error logs nightly to find bugs that didn't get caught by developers or QA. Surfaces what's actually breaking in the wild.",
+    impact: [
+      { role: "If you do CS or support", text: "Fewer mystery bugs that customers find before we do. Issues get fixed before they become tickets." },
+      { role: "If you do QA", text: "Less time hunting for what's broken. More time verifying fixes." },
+      { role: "If you're a customer", text: "More stable product. Things that would have silently failed get caught and fixed." },
+    ],
+  },
+  {
+    id: "B13",
+    name: "Done means done. Customer hears about it",
+    price: 25,
+    desc: "When an engineer marks a ticket Done, it auto-posts to a Slack channel, tags whoever reported the bug, looks up the customer in HubSpot, and pings the CSM so they can tell the customer.",
+    impact: [
+      { role: "If you do CS", text: "You always know which of your customer's issues got resolved. You're never the last to know. You always have a 'win' to send." },
+      { role: "If you do support", text: "Your tickets close visibly. The customer hears back without you chasing engineering." },
+      { role: "If you do engineering", text: "Marking Done becomes a public commitment. People only do it when something is actually shipped and working." },
+    ],
+  },
+  {
+    id: "B14",
+    name: "Plan one month at a time",
+    price: 20,
+    desc: "Each team publishes a one-month roadmap instead of a quarter. Leadership reviews what shipped at month end, then sets the next month from there. Anthropic moved to this. Quarterly artifacts retire.",
+    impact: [
+      { role: "If you do product or PM", text: "Less time on quarterly roadmap theater. More time on what's actually next." },
+      { role: "If you do sales or CS", text: "A more reliable 30-day view of what's coming. Easier to set customer expectations honestly." },
+      { role: "If you do engineering", text: "You stop overcommitting to work three months out that you couldn't have predicted today." },
+    ],
+  },
+  {
+    id: "B16",
+    name: "Support to engineering bug pipeline",
+    price: 25,
+    desc: "Each week, Claude cross-references support tickets in HubSpot against bugs in Jira by category and volume. Engineering prioritizes by actual customer impact, not by whoever lobbies the loudest.",
+    impact: [
+      { role: "If you do support", text: "Your tickets translate into engineering action you can see. No more black hole." },
+      { role: "If you do engineering or product", text: "Real prioritization signal. The bug that's hitting 30 customers gets ranked above the one hitting one loud customer." },
+      { role: "If you're a CSM", text: "Recurring customer pain finally gets weight without you having to escalate." },
+    ],
+  },
+  {
+    id: "B17",
+    name: "Coaching briefs, not coaching spreadsheets",
+    price: 25,
+    desc: "Each week, Claude generates a coaching brief for each support agent: escalation rate, case aging, write-up quality, stage hygiene. Managers walk into 1:1s with the data ready.",
+    impact: [
+      { role: "If you do support", text: "Faster feedback loops. You know where you stand without your manager having to compile a spreadsheet." },
+      { role: "If you manage support", text: "You spend coaching time on the conversation, not the prep. You walk in already informed." },
+      { role: "If you're a customer", text: "Better-trained agents. Faster resolution. Cleaner handoffs." },
+    ],
+  },
 ];
 
 function PantherVote() {
@@ -46,10 +144,17 @@ function PantherVote() {
   const [name, setName] = useState("");
   const [team, setTeam] = useState("");
   const [picks, setPicks] = useState(() => new Set());
+  const [expanded, setExpanded] = useState(() => new Set());
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+
+  function toggleExpand(id) {
+    const next = new Set(expanded);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setExpanded(next);
+  }
 
   const spent = useMemo(
     () => BETS.filter(b => picks.has(b.id)).reduce((s, b) => s + b.price, 0),
@@ -121,12 +226,6 @@ function PantherVote() {
           You have <span class="font-semibold" style=${{ color: ORANGE }}>$${BUDGET}</span> to spend on the team's bets.
           Each bet is priced by the effort to ship it. Pick the ones you'd actually fund.
         </p>
-        <p class="text-neutral-500 text-sm mt-3">
-          For the full write-up on each bet, see${" "}
-          <a href=${PARENT_BETS_URL} target="_blank" rel="noreferrer" class="underline hover:text-neutral-700">
-            the parent bets page
-          </a>.
-        </p>
       </header>
 
       <div class="rule mb-8"></div>
@@ -183,28 +282,52 @@ function PantherVote() {
             ${BETS.map(b => {
               const picked = picks.has(b.id);
               const tooExpensive = !picked && b.price > remaining;
+              const isOpen = expanded.has(b.id);
               return html`
                 <li
                   key=${b.id}
-                  onClick=${() => !tooExpensive && toggle(b)}
-                  class=${`border p-4 cursor-pointer transition ${
-                    picked ? "border-neutral-900 bg-neutral-50" : tooExpensive ? "border-neutral-200 opacity-40 cursor-not-allowed" : "border-neutral-200 hover:border-neutral-400"
+                  class=${`border p-4 transition ${
+                    picked ? "border-neutral-900 bg-neutral-50" : tooExpensive ? "border-neutral-200 opacity-40" : "border-neutral-200 hover:border-neutral-400"
                   }`}
                 >
-                  <div class="flex items-start justify-between gap-4">
+                  <div
+                    onClick=${() => !tooExpensive && toggle(b)}
+                    class=${`flex items-start justify-between gap-4 ${tooExpensive ? "cursor-not-allowed" : "cursor-pointer"}`}
+                  >
                     <div class="flex-1">
                       <div class="flex items-center gap-2 mb-1">
                         <span class="font-mono text-xs text-neutral-400">${b.id}</span>
                         <span class="font-semibold">${b.name}</span>
                       </div>
-                      <div class="text-sm text-neutral-700 mb-1">${b.desc}</div>
-                      <div class="text-xs text-neutral-500">${b.owner}</div>
+                      <div class="text-sm text-neutral-700">${b.desc}</div>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right shrink-0">
                       <div class="font-semibold" style=${{ color: picked ? ORANGE : "#171717" }}>$${b.price}</div>
                       <div class="text-xs text-neutral-500 mt-1">${picked ? "Picked" : tooExpensive ? "Over budget" : "Tap to pick"}</div>
                     </div>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick=${(e) => { e.stopPropagation(); toggleExpand(b.id); }}
+                    class="mt-3 text-xs uppercase tracking-widest text-neutral-500 hover:text-neutral-900"
+                  >
+                    ${isOpen ? "Hide details −" : "Learn more +"}
+                  </button>
+
+                  ${isOpen && html`
+                    <div class="mt-3 pt-3 border-t border-neutral-200 space-y-2">
+                      <div class="text-xs uppercase tracking-widest text-neutral-500">Why this matters to you</div>
+                      <ul class="space-y-2">
+                        ${b.impact.map(im => html`
+                          <li class="text-sm">
+                            <div class="font-medium text-neutral-900">${im.role}</div>
+                            <div class="text-neutral-700">${im.text}</div>
+                          </li>
+                        `)}
+                      </ul>
+                    </div>
+                  `}
                 </li>
               `;
             })}
