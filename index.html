@@ -244,13 +244,19 @@ function PantherVote() {
               />
             </div>
             <div>
-              <label class="block text-sm text-neutral-600 mb-1">Team</label>
-              <input
+              <label class="block text-sm text-neutral-600 mb-1">Team you spend the most time on</label>
+              <select
                 value=${team}
-                onInput=${e => setTeam(e.target.value)}
-                class="w-full border border-neutral-300 px-3 py-2 focus:outline-none focus:border-neutral-900"
-                placeholder="SDL, GovPilot, Hedgerow, etc."
-              />
+                onChange=${e => setTeam(e.target.value)}
+                class="w-full border border-neutral-300 px-3 py-2 bg-white focus:outline-none focus:border-neutral-900"
+              >
+                <option value="">Pick one</option>
+                <option value="GovPilot">GovPilot</option>
+                <option value="SDL Connect">SDL Connect</option>
+                <option value="Hedgerow">Hedgerow</option>
+                <option value="Cross-functional">Cross-functional</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
           </div>
           <button
