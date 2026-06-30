@@ -188,6 +188,8 @@ const BETS = [
     name: "What shipped today, in plain English",
     price: 15,
     desc: "Claude posts a daily summary of what shipped that day to a Slack channel, in words that aren't commit messages. Fun, light, readable.",
+    summary: "If Claude posts a daily fun summary of what shipped to a dedicated channel in plain English, engineering's work becomes visible to the rest of the org and the morale loop inside the eng team strengthens.",
+    smart: "Daily post lives in a new channel by July 15, 2026. By end of Q3, 60% of weekday posts have at least 3 reactions or 1 comment. Ship of the day vote runs each Friday.",
     impact: [
       { role: "If you do CS or support", text: "You know what fixes shipped without asking. Faster, more accurate customer responses." },
       { role: "If you do marketing or sales", text: "You see stories to pull forward without having to interrogate engineering. Release stories are easier to write." },
@@ -199,6 +201,8 @@ const BETS = [
     name: "Mine customer calls for bugs and feature requests",
     price: 35,
     desc: "Claude listens to every Gong CS call nightly, pulls out anything that sounds like a bug or a feature request, double checks with the CSM, then files it in Jira.",
+    summary: "If Claude scans Gong CS calls nightly and pre-files confirmed bugs and feature requests, the gap between customer signal and engineering action shrinks from weeks to one day.",
+    smart: "Pipeline live for a pilot CS team by August 1, 2026. By end of Q3, 80% of bug and FR mentions produce a confirmation DM to the CSM within 24 hours. At least 50% are confirmed and filed. Stretch: 20% of confirmed bugs get a draft PR from Claude.",
     impact: [
       { role: "If you do CS", text: "You stop having to remember every passing comment from a call. The system catches them and asks you to confirm. Customers feel heard." },
       { role: "If you do product or engineering", text: "You get a steady stream of validated customer signal instead of having to chase it. Prioritization gets sharper." },
@@ -210,6 +214,8 @@ const BETS = [
     name: "Release notes that actually ship",
     price: 15,
     desc: "Hedgerow already proved the workflow: engineers feed input, Claude drafts the notes, Millie reviews and edits, notes get published. We extend the same playbook to GovPilot and SDL Connect.",
+    summary: "If we replicate Hedgerow's release-notes workflow across GovPilot and SDL Connect with Millie as the named reviewer, release notes will ship with every release instead of sporadically or not at all.",
+    smart: "By August 1, 2026, the Hedgerow release notes workflow is documented and adopted by GovPilot and SDL Connect, with Millie assigned as reviewer for both lines. By end of Q3, 100% of releases across all three product lines ship with release notes published within 48 hours of release.",
     impact: [
       { role: "If you do sales", text: "Real talking points for every release. No more 'I think we shipped that?'" },
       { role: "If you do CS", text: "Notes you can point a customer at when they ask what's new. Customers see steady forward motion." },
@@ -221,6 +227,8 @@ const BETS = [
     name: "A living ICP, with citations",
     price: 35,
     desc: "Claude builds and maintains our Ideal Customer Profile by pulling from Gong calls and other sources, citing every claim, refreshed on a cadence. Replaces the static deck that's already out of date.",
+    summary: "Our ICPs lack citations and don't update when the market moves. If we build a Claude-assisted pipeline that pulls from Gong and other sources, with human review and required sourcing on every claim, GovPilot will have a living ICP that keeps sales, marketing, and product aligned on who we serve and why they buy.",
+    smart: "By September 1, 2026, a Claude-assisted pipeline is pulling from Gong and at least one additional source and depositing cited output into a PMM knowledge base for human review. By end of Q3, a fully sourced ICP exists for at least one product line with every claim traceable to a specific source and a recurring refresh cadence in place.",
     impact: [
       { role: "If you do sales", text: "You target the right buyers because the profile actually reflects who's buying right now, not who was buying 18 months ago." },
       { role: "If you do marketing", text: "Messaging stays calibrated to the real customer. Every claim is traceable to a source you can quote." },
@@ -232,6 +240,8 @@ const BETS = [
     name: "Let AI generate large parts of our code",
     price: 40,
     desc: "We give Claude a spec and let it generate big chunks of our codebase. We use it to ship faster when we pick up a new framework or rebuild an aging service.",
+    summary: "Generating large parts of the codebase allows much faster pivoting to new technologies. Quality can be improved at scale.",
+    smart: "Hedgehog REST API for Nexus Issues completed by end of July.",
     impact: [
       { role: "If you do product", text: "Pivoting to new tech stops being a one-year project. New ideas can be tried at a fraction of the cost." },
       { role: "If you do sales or CS", text: "Faster delivery of customer-requested capabilities. Things that used to take a quarter take weeks." },
@@ -243,6 +253,8 @@ const BETS = [
     name: "Catch bugs from the error logs",
     price: 20,
     desc: "Claude scans Sentry error logs nightly to find bugs that didn't get caught by developers or QA. Surfaces what's actually breaking in the wild.",
+    summary: "Catch things neither developers nor QA catch but are evident in the logs.",
+    smart: "By end of Q3 2026 we have an automated way to do this against the QA instance.",
     impact: [
       { role: "If you do CS or support", text: "Fewer mystery bugs that customers find before we do. Issues get fixed before they become tickets." },
       { role: "If you do QA", text: "Less time hunting for what's broken. More time verifying fixes." },
@@ -254,6 +266,8 @@ const BETS = [
     name: "Done means done. Customer hears about it",
     price: 25,
     desc: "When an engineer marks a ticket Done, it auto-posts to a Slack channel, tags whoever reported the bug, looks up the customer in HubSpot, and pings the CSM so they can tell the customer.",
+    summary: "Today 'Done' is a status field that doesn't bind anyone to anything. If every ticket moved to Done auto-posts to a dedicated Slack channel, tags the reporter, looks up the originating customer in HubSpot, and pings the CSM, 'Done' becomes a public commitment the moment it's clicked, and the gap between ship and customer notification shrinks from days (or never) to seconds.",
+    smart: "By September 1, 2026, every ticket moved to Done across JET, Connect, Migration, and DevOps auto-posts to a dedicated Slack channel with the reporter tagged and (where applicable) the HubSpot contact and CSM identified. By end of Q3, 80% of customer-reported tickets have the CSM notified within one hour of Done. Reopen rate on tickets touched by the automation drops vs. the June baseline.",
     impact: [
       { role: "If you do CS", text: "You always know which of your customer's issues got resolved. You're never the last to know. You always have a 'win' to send." },
       { role: "If you do support", text: "Your tickets close visibly. The customer hears back without you chasing engineering." },
@@ -265,6 +279,8 @@ const BETS = [
     name: "Plan one month at a time",
     price: 20,
     desc: "Each team publishes a one-month roadmap instead of a quarter. Leadership reviews what shipped at month end, then sets the next month from there. Anthropic moved to this. Quarterly artifacts retire.",
+    summary: "We're shipping AI features that change weekly. Pretending we can plan a quarter is theater. A one-month cycle with honest month-end reviews matches the speed of the work and forces sharper choices about what actually gets done. Long-term vision and principles stay fixed and loud — the roadmap stays JIT.",
+    smart: "By August 1, 2026, every product team (JET, Connect, Migration, DevOps, Hedgerow, PMM) publishes a one-month roadmap to a shared Confluence space, and the leadership team runs a month-end review of what shipped vs. what was planned before the next month opens. By end of Q3, completion rate on stated monthly bets exceeds 70% and quarterly planning artifacts are retired.",
     impact: [
       { role: "If you do product or PM", text: "Less time on quarterly roadmap theater. More time on what's actually next." },
       { role: "If you do sales or CS", text: "A more reliable 30-day view of what's coming. Easier to set customer expectations honestly." },
@@ -276,6 +292,8 @@ const BETS = [
     name: "Support to engineering bug pipeline",
     price: 25,
     desc: "Each week, Claude cross-references support tickets in HubSpot against bugs in Jira by category and volume. Engineering prioritizes by actual customer impact, not by whoever lobbies the loudest.",
+    summary: "If support tickets are systematically cross-referenced against Jira issues by category and volume on a weekly cadence, engineering will be able to prioritize recurring customer-reported bugs by actual impact instead of loudest voice.",
+    smart: "By September 1, 2026, a weekly bug signal report is published from support to engineering that correlates HubSpot ticket volume by issue category to open Jira issues. By end of Q3, average time to first engineering triage on urgent and high priority issues surfaced in the report is 30% faster than the June baseline.",
     impact: [
       { role: "If you do support", text: "Your tickets translate into engineering action you can see. No more black hole." },
       { role: "If you do engineering or product", text: "Real prioritization signal. The bug that's hitting 30 customers gets ranked above the one hitting one loud customer." },
@@ -287,10 +305,38 @@ const BETS = [
     name: "Coaching briefs, not coaching spreadsheets",
     price: 25,
     desc: "Each week, Claude generates a coaching brief for each support agent: escalation rate, case aging, write-up quality, stage hygiene. Managers walk into 1:1s with the data ready.",
+    summary: "If agent performance signals — escalation rate, case aging, write-up quality, stage hygiene — are automatically surfaced in a structured weekly brief rather than manually compiled, support managers can spend coaching time on the conversation instead of the spreadsheet, and agents get faster, more consistent feedback loops.",
+    smart: "By September 1, 2026, weekly agent coaching briefs for both support teams are generated automatically from HubSpot pipeline data with no manual compilation required. By end of Q3, average time-to-feedback on flagged performance patterns drops by 50% from the June baseline, and 1:1 prep time is reduced by at least 30 minutes per agent per week.",
     impact: [
       { role: "If you do support", text: "Faster feedback loops. You know where you stand without your manager having to compile a spreadsheet." },
       { role: "If you manage support", text: "You spend coaching time on the conversation, not the prep. You walk in already informed." },
       { role: "If you're a customer", text: "Better-trained agents. Faster resolution. Cleaner handoffs." },
+    ],
+  },
+  {
+    id: "B18",
+    name: "Skill telemetry in the report cards",
+    price: 25,
+    desc: "Log every skill invocation per engineer. Surface a PR-per-token ratio in the daily report cards so managers can coach AI usage as a learnable skill.",
+    summary: "Spend is not enough of a signal. If we log every skill invocation per engineer and surface a PR-per-token ratio in the daily report cards, engineering managers can coach AI usage as a learnable skill instead of hoping it's happening.",
+    smart: "By end of Q3 2026, every engineer in SDL and GovPilot has a weekly tier assignment. Daily report cards include skill invocations and a PRs-per-million-tokens ratio. Managers reference it in 1:1s at least twice a month.",
+    impact: [
+      { role: "If you manage engineers", text: "You can coach AI usage as a real skill, with weekly tier assignments instead of vibes." },
+      { role: "If you do engineering", text: "Your AI work becomes visible. Improving your ratio is a concrete thing to get better at." },
+      { role: "If you do product or leadership", text: "You see which teams are getting leverage from AI and which aren't." },
+    ],
+  },
+  {
+    id: "B19",
+    name: "Shared skills for AI specs, epics, stories, and tasks",
+    price: 20,
+    desc: "A shared set of skills that generate AI specs, epics, user stories, and tasks at a consistent size and shape, so velocity and signal both go up.",
+    summary: "A way to increase velocity and signal is for all of us to work from the same size of epic, user story, and task. Skills can produce those for us so the shape stays consistent across teams.",
+    smart: "To be defined.",
+    impact: [
+      { role: "If you do product or PM", text: "Epics and stories come out at the same size every time. Planning conversations get a lot less noisy." },
+      { role: "If you do engineering", text: "Tasks are scoped consistently. No more guessing what 'small' or 'large' means across teams." },
+      { role: "If you do leadership", text: "You can compare across teams because the units of work are actually comparable." },
     ],
   },
 ];
@@ -392,15 +438,29 @@ const BetCard = ({ bet, picked, tooExpensive, isOpen, onToggle, onToggleExpand }
 
     ${isOpen && html`
       <div class="why-block">
-        <div class="micro" style=${{ marginBottom: '12px' }}>Why this matters to you</div>
-        <ul class="space-y-3">
-          ${bet.impact.map(im => html`
-            <li>
-              <div class="t-bodySm" style=${{ color: 'var(--text)', fontWeight: 500 }}>${im.role}</div>
-              <div class="t-bodySm">${im.text}</div>
-            </li>
-          `)}
-        </ul>
+        ${bet.summary && html`
+          <div style=${{ marginBottom: '20px' }}>
+            <div class="micro" style=${{ marginBottom: '8px' }}>The bet</div>
+            <p class="t-bodySm">${bet.summary}</p>
+          </div>
+        `}
+        ${bet.smart && html`
+          <div style=${{ marginBottom: '20px' }}>
+            <div class="micro" style=${{ marginBottom: '8px' }}>SMART goal</div>
+            <p class="t-bodySm">${bet.smart}</p>
+          </div>
+        `}
+        <div>
+          <div class="micro" style=${{ marginBottom: '12px' }}>Why this matters to you</div>
+          <ul class="space-y-3">
+            ${bet.impact.map(im => html`
+              <li>
+                <div class="t-bodySm" style=${{ color: 'var(--text)', fontWeight: 500 }}>${im.role}</div>
+                <div class="t-bodySm">${im.text}</div>
+              </li>
+            `)}
+          </ul>
+        </div>
       </div>
     `}
   </li>
