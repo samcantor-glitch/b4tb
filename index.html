@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Panther · Bang for the Buck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body, #root { background: #fff; font-family: 'Poppins', system-ui, sans-serif; color: #171717; }
+  .rule { height: 1px; background: #e5e5e5; }
+  .sticky-bar { position: sticky; top: 0; z-index: 10; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="module">
+import { html, render, useState, useMemo } from 'https://esm.sh/htm/preact/standalone';
+
+// === CONFIG ===========================================================
+// Paste the Apps Script Web App URL here after you deploy the script.
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbyUSXtmX3vlPu5dOcjRhOux3MPwJp21MnCirIOoJvbg3OoVqELAgm_l8YygnqTxl-UbSg/exec";
+const PARENT_BETS_URL = "https://govpilot.atlassian.net/wiki/spaces/SD/pages/1297285133";
+const BUDGET = 100;
+const ORANGE = "#FF4D1C";
+// =====================================================================
+
+const BETS = [
+  { id: "B04", name: "What shipped today, in plain English", owner: "Sam", price: 15, desc: "Claude posts a daily Slack summary of what shipped, in plain English." },
+  { id: "B05", name: "Mine CS calls for bugs and FRs", owner: "Sam + Bill", price: 35, desc: "Claude scans Gong calls nightly, pulls bugs and FRs, CSM confirms, files Jira." },
+  { id: "B07", name: "Release notes that actually ship", owner: "Jennifer", price: 15, desc: "Extend Hedgerow's release-notes workflow to GovPilot and SDL Connect." },
+  { id: "B08", name: "A living ICP, with citations", owner: "Jennifer", price: 35, desc: "Claude maintains the ICP from Gong and other sources, every claim cited." },
+  { id: "B09", name: "Let AI generate large parts of our code", owner: "Hannes", price: 40, desc: "Give Claude a spec, let it generate big chunks of the codebase." },
+  { id: "B11", name: "Catch bugs from the error logs", owner: "Hannes", price: 20, desc: "Claude scans Sentry nightly to surface bugs QA and devs missed." },
+  { id: "B13", name: "Done means done. Customer hears about it", owner: "Sam", price: 25, desc: "Ticket Done auto-pings the CSM via HubSpot so the customer hears." },
+  { id: "B14", name: "Plan one month at a time", owner: "Sam", price: 20, desc: "Retire the quarterly roadmap. Each team publishes one month at a time." },
+  { id: "B16", name: "Support to engineering bug pipeline", owner: "Justin", price: 25, desc: "Weekly cross-ref of HubSpot tickets vs Jira bugs so volume drives priority." },
+  { id: "B17", name: "Coaching briefs, not coaching spreadsheets", owner: "Justin", price: 25, desc: "Weekly auto-brief per support agent so managers walk into 1:1s ready." },
+];
+
+function PantherVote() {
+  const [step, setStep] = useState("identify");
+  const [name, setName] = useState("");
+  const [team, setTeam] = useState("");
+  const [picks, setPicks] = useState(() => new Set());
+  const [note, setNote] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  const spent = useMemo(
+    () => BETS.filter(b => picks.has(b.id)).reduce((s, b) => s + b.price, 0),
+    [picks]
+  );
+  const remaining = BUDGET - spent;
+
+  function toggle(bet) {
+    const next = new Set(picks);
+    if (next.has(bet.id)) {
+      next.delete(bet.id);
+    } else {
+      if (spent + bet.price > BUDGET) return;
+      next.add(bet.id);
+    }
+    setPicks(next);
+  }
+
+  async function submit() {
+    setError("");
+    if (!name.trim() || !team.trim()) { setError("Name and team are required."); return; }
+    if (picks.size === 0) { setError("Pick at least one bet."); return; }
+    if (ENDPOINT.startsWith("REPLACE")) {
+      setError("Voting endpoint isn't configured yet. Sam needs to paste the Apps Script URL into index.html.");
+      return;
+    }
+    setSubmitting(true);
+    const payload = {
+      voter: name.trim(),
+      team: team.trim(),
+      picks: BETS.filter(b => picks.has(b.id)).map(b => ({ id: b.id, name: b.name, price: b.price })),
+      spent,
+      note: note.trim(),
+      submitted_at: new Date().toISOString(),
+    };
+    try {
+      await fetch(ENDPOINT, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+      });
+      setSubmitted(true);
+    } catch (e) {
+      setError("Couldn't submit. Try again, or screenshot your picks and send them to Sam.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (submitted) {
+    return html`
+      <div class="max-w-2xl mx-auto px-6 py-24">
+        <div class="text-xs uppercase tracking-widest text-neutral-500 mb-3">Vote in</div>
+        <h1 class="text-4xl font-semibold mb-6">Thanks, ${name.split(" ")[0]}.</h1>
+        <div class="rule mb-6"></div>
+        <p class="text-neutral-700 mb-2">Your picks are logged. Sam has them.</p>
+        <p class="text-neutral-500 text-sm">You spent $${spent} of $${BUDGET} on ${picks.size} bet${picks.size === 1 ? "" : "s"}.</p>
+      </div>
+    `;
+  }
+
+  return html`
+    <div class="max-w-3xl mx-auto px-6 py-12">
+      <header class="mb-8">
+        <div class="text-xs uppercase tracking-widest text-neutral-500 mb-2">Panther</div>
+        <h1 class="text-4xl font-semibold mb-3">Bang for the Buck</h1>
+        <p class="text-neutral-600 max-w-xl">
+          You have <span class="font-semibold" style=${{ color: ORANGE }}>$${BUDGET}</span> to spend on the team's bets.
+          Each bet is priced by the effort to ship it. Pick the ones you'd actually fund.
+        </p>
+        <p class="text-neutral-500 text-sm mt-3">
+          For the full write-up on each bet, see${" "}
+          <a href=${PARENT_BETS_URL} target="_blank" rel="noreferrer" class="underline hover:text-neutral-700">
+            the parent bets page
+          </a>.
+        </p>
+      </header>
+
+      <div class="rule mb-8"></div>
+
+      ${step === "identify" && html`
+        <section>
+          <h2 class="text-xs uppercase tracking-widest text-neutral-500 mb-4">Who's voting</h2>
+          <div class="space-y-4 mb-8">
+            <div>
+              <label class="block text-sm text-neutral-600 mb-1">Your name</label>
+              <input
+                value=${name}
+                onInput=${e => setName(e.target.value)}
+                class="w-full border border-neutral-300 px-3 py-2 focus:outline-none focus:border-neutral-900"
+                placeholder="Jane Doe"
+              />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-600 mb-1">Team</label>
+              <input
+                value=${team}
+                onInput=${e => setTeam(e.target.value)}
+                class="w-full border border-neutral-300 px-3 py-2 focus:outline-none focus:border-neutral-900"
+                placeholder="SDL, GovPilot, Hedgerow, etc."
+              />
+            </div>
+          </div>
+          <button
+            onClick=${() => setStep("vote")}
+            disabled=${!name.trim() || !team.trim()}
+            class="px-6 py-2 text-white font-medium disabled:opacity-40"
+            style=${{ background: ORANGE }}
+          >
+            Start voting
+          </button>
+        </section>
+      `}
+
+      ${step === "vote" && html`
+        <section>
+          <div class="sticky-bar bg-white py-4 -mx-6 px-6 border-b border-neutral-200 mb-6 flex items-baseline justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-widest text-neutral-500">Remaining</div>
+              <div class="text-3xl font-semibold" style=${{ color: remaining === 0 ? "#171717" : ORANGE }}>
+                $${remaining}
+              </div>
+            </div>
+            <div class="text-sm text-neutral-500">
+              ${picks.size} bet${picks.size === 1 ? "" : "s"} · $${spent} spent
+            </div>
+          </div>
+
+          <ul class="space-y-3 mb-8">
+            ${BETS.map(b => {
+              const picked = picks.has(b.id);
+              const tooExpensive = !picked && b.price > remaining;
+              return html`
+                <li
+                  key=${b.id}
+                  onClick=${() => !tooExpensive && toggle(b)}
+                  class=${`border p-4 cursor-pointer transition ${
+                    picked ? "border-neutral-900 bg-neutral-50" : tooExpensive ? "border-neutral-200 opacity-40 cursor-not-allowed" : "border-neutral-200 hover:border-neutral-400"
+                  }`}
+                >
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 mb-1">
+                        <span class="font-mono text-xs text-neutral-400">${b.id}</span>
+                        <span class="font-semibold">${b.name}</span>
+                      </div>
+                      <div class="text-sm text-neutral-700 mb-1">${b.desc}</div>
+                      <div class="text-xs text-neutral-500">${b.owner}</div>
+                    </div>
+                    <div class="text-right">
+                      <div class="font-semibold" style=${{ color: picked ? ORANGE : "#171717" }}>$${b.price}</div>
+                      <div class="text-xs text-neutral-500 mt-1">${picked ? "Picked" : tooExpensive ? "Over budget" : "Tap to pick"}</div>
+                    </div>
+                  </div>
+                </li>
+              `;
+            })}
+          </ul>
+
+          <div class="mb-6">
+            <label class="block text-xs uppercase tracking-widest text-neutral-500 mb-2">
+              Anything to add (optional)
+            </label>
+            <textarea
+              value=${note}
+              onInput=${e => setNote(e.target.value)}
+              rows=${3}
+              class="w-full border border-neutral-300 px-3 py-2 focus:outline-none focus:border-neutral-900"
+              placeholder="Why these bets, what's missing, what you'd push back on."
+            ></textarea>
+          </div>
+
+          ${error && html`<div class="text-sm mb-4" style=${{ color: ORANGE }}>${error}</div>`}
+
+          <div class="flex items-center gap-3">
+            <button
+              onClick=${submit}
+              disabled=${submitting || picks.size === 0}
+              class="px-6 py-2 text-white font-medium disabled:opacity-40"
+              style=${{ background: ORANGE }}
+            >
+              ${submitting ? "Submitting…" : "Submit vote"}
+            </button>
+            <button
+              onClick=${() => setStep("identify")}
+              class="px-3 py-2 text-sm text-neutral-500 hover:text-neutral-800"
+            >
+              Back
+            </button>
+          </div>
+        </section>
+      `}
+
+      <footer class="mt-16 pt-6 border-t border-neutral-200 text-xs text-neutral-400">
+        Panther · Bang for the Buck · One vote per person.
+      </footer>
+    </div>
+  `;
+}
+
+render(html`<${PantherVote} />`, document.getElementById('root'));
+</script>
+</body>
+</html>
