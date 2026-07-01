@@ -26,15 +26,22 @@ function doPost(e) {
         "voter",
         "team",
         "spent",
-        "num_picks",
+        "num_bets",
+        "total_units",
         "pick_ids",
         "pick_names",
         "note",
       ]);
     }
 
-    const pickIds = (data.picks || []).map(p => p.id).join(", ");
-    const pickNames = (data.picks || []).map(p => `${p.id} ${p.name} ($${p.price})`).join(" | ");
+    const pickIds = (data.picks || []).map(p => p.count > 1 ? `${p.id}×${p.count}` : p.id).join(", ");
+    const pickNames = (data.picks || []).map(p => {
+      const c = p.count || 1;
+      const sub = p.subtotal || p.price * c;
+      const cLabel = c > 1 ? ` ×${c}` : "";
+      return `${p.id}${cLabel} ${p.name} ($${sub})`;
+    }).join(" | ");
+    const totalUnits = (data.picks || []).reduce((s, p) => s + (p.count || 1), 0);
 
     sheet.appendRow([
       data.submitted_at || new Date().toISOString(),
@@ -42,6 +49,7 @@ function doPost(e) {
       data.team || "",
       data.spent || 0,
       (data.picks || []).length,
+      totalUnits,
       pickIds,
       pickNames,
       data.note || "",
